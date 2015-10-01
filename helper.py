@@ -57,8 +57,13 @@ def updateSlots():
 def availableFilter(possible_slots):
     #given a list of slots, figure out which still have open positions
     # return those
-    #STUB
-    return possible_slots
+    available_slots = []
+    for slot in possible_slots:
+        wks = GC.open_by_url(slot[SHEETURL]).sheet1
+        if wks.row_count > 31 and (any(map(lambda x: x.value == '', wks.range('A1:A31')) ) ):
+            available_slots.append(slot)
+    return available_slots
+    
 
 
 
@@ -79,7 +84,7 @@ def possibleFilter(all_slots):
         else:
             break
     available_slots = sorted_slots 
-    available_slots = [x for x in available_slots if x[SHEETURL] =! '']
+    available_slots = [x for x in available_slots if x[SHEETURL] != '']
     return available_slots
 
 def newSlots(available_slots):
@@ -90,6 +95,7 @@ def newSlots(available_slots):
 def updateNewSlots(new_slots, available_slots, sheet_url):
     #for each new slot, create a google sheet, then link it to the master sheet and update the available_slots json
     #return the avaialble_slots json for use by the app
+    #STUB
     return available_slots
 
 
