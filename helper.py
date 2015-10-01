@@ -68,7 +68,7 @@ def updateSlots():
     all_slots = allSlots()
     possible_slots = possibleFilter(all_slots)
     #new = doesn't have a spreadsheet linked yet
-    new_slots = newFilter(available_slots)
+    new_slots = newFilter(possible_slots)
     #STUB: create google sheets
     return True
 
