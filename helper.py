@@ -110,17 +110,17 @@ def newFilter(available_slots):
     new_slots = [x for x in available_slots if x[SHEETURL] == '']
     return available_slots
 
-def updateNewSlots(new_slots, available_slots, sheet_url):
+#def updateNewSlots(new_slots, sheet_url):
     #for each new slot, create a google sheet, then link it to the master sheet and update the available_slots json
     #return the avaialble_slots json for use by the app
     #STUB
-    return available_slots
+ #   return available_slots
 
 
 def dateTimer(slot):
     datetime_text = slot[DATE] + " " + slot[TIMENYC]
     try:
-        toreturn = arrow.get(datetime_text, 'M/D/YYYY H:m PP')
+        toreturn = arrow.get(datetime_text, 'M/D/YYYY h:m A')
         toreturn.replace(tzinfo=tz.gettz("US/Eastern"))
     except:
         #print("ERROR" + datetime_text)
