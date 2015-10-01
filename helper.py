@@ -1,17 +1,37 @@
+
 import requests
 import arrow
+import gspread
 from dateutil import tz
+from oauth2client.client import SignedJwtAssertionCredentials
 
-#Constants -- column names
+
+#Constants 
+# -- sheetsu
+SHEETSU_URL = "http://sheetsu.com/apis/4c61fd45"
+MASTER_URL = "https://docs.google.com/spreadsheets/d/1fCtHu00KCcOAG124hyyrwu3iltEd6amJPYhhXrO3ptY"
+
+# -- column names
 ARROWTIME = 'arrowtime'
 SHEETURL = 'SheetURL'
 DATE = 'Day'
 TIMENYC = 'TimeNYC'
 
+#Other globals:
+GC = None
+
+def setup():
+    json_key = json.load(open('Bernie-Balancer-oauth.json'))
+    scope = ['https://spreadsheets.google.com/feeds']
+    credentials = SignedJwtAssertionCredentials(json_key['client_email'], bytes(json_key['private_key'], 'utf-8'), scope)
+    gc = gspread.authorize(credentials)
+    GC = gc
+
+
+
 #Gets the master list of calls from spreadsheet
 def allSlots(): 
-    SHEETSU_URL = "http://sheetsu.com/apis/4c61fd45"
-    MASTER_URL = "https://docs.google.com/spreadsheets/d/1fCtHu00KCcOAG124hyyrwu3iltEd6amJPYhhXrO3ptY"
+    
     r = requests.get(SHEETSU_URL)
     try:
         all_slots = r.json()['result']

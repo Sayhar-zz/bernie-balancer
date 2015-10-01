@@ -2,6 +2,13 @@
 __pycache__/
 *.py[cod]
 
+#ipython
+*.ipynb
+
+#sensitive oauth
+*oauth.json*
+
+
 # C extensions
 *.so
 
