@@ -1,7 +1,7 @@
-
 import requests
 import arrow
 import gspread
+from flask import json
 from dateutil import tz
 from oauth2client.client import SignedJwtAssertionCredentials
 
@@ -17,26 +17,44 @@ SHEETURL = 'SheetURL'
 DATE = 'Day'
 TIMENYC = 'TimeNYC'
 
-#Other globals:
-GC = None
+#Other globals:  
+caching = {}
 
 def setup():
     json_key = json.load(open('Bernie-Balancer-oauth.json'))
     scope = ['https://spreadsheets.google.com/feeds']
     credentials = SignedJwtAssertionCredentials(json_key['client_email'], bytes(json_key['private_key'], 'utf-8'), scope)
     gc = gspread.authorize(credentials)
-    GC = gc
+    #global gc
+    #gc = gspreadcontext
+    return gc
 
+gc = setup()
 
 
 #Gets the master list of calls from spreadsheet
 def allSlots(): 
     
+    if caching.get('all_slots', False):
+        #we have a cached all_slots
+        cached_time = caching.get('time_all_slots', arrow.utcnow().replace(hours=-1)) 
+        if cached_time >  arrow.utcnow().replace(minutes=-5):
+            #use cache!
+            print("cached all_slots")
+            return caching['all_slots']
+        else:
+            #timing is off!
+            print('timing!')
+    #else
+    print('uncached!')
     r = requests.get(SHEETSU_URL)
     try:
         all_slots = r.json()['result']
     except Exception as e:
         return {"Error":e}
+    
+    caching['all_slots'] = all_slots
+    caching['time_all_slots'] = arrow.utcnow()
     return all_slots
 
 def getAvailableSlots():
@@ -50,7 +68,7 @@ def updateSlots():
     all_slots = allSlots()
     possible_slots = possibleFilter(all_slots)
     #new = doesn't have a spreadsheet linked yet
-    new_slots = newSlots(available_slots)
+    new_slots = newFilter(available_slots)
     #STUB: create google sheets
     return True
 
@@ -59,7 +77,7 @@ def availableFilter(possible_slots):
     # return those
     available_slots = []
     for slot in possible_slots:
-        wks = GC.open_by_url(slot[SHEETURL]).sheet1
+        wks = gc.open_by_url(slot[SHEETURL]).sheet1
         if wks.row_count > 31 and (any(map(lambda x: x.value == '', wks.range('A1:A31')) ) ):
             available_slots.append(slot)
     return available_slots
@@ -87,7 +105,7 @@ def possibleFilter(all_slots):
     available_slots = [x for x in available_slots if x[SHEETURL] != '']
     return available_slots
 
-def newSlots(available_slots):
+def newFilter(available_slots):
     #Given a dict of times, find only those that have no linked spreadsheet
     new_slots = [x for x in available_slots if x[SHEETURL] == '']
     return available_slots
