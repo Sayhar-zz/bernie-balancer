@@ -8,9 +8,9 @@ from oauth2client.client import SignedJwtAssertionCredentials
 
 #Constants 
 # -- sheetsu
-SHEETSU_URL = "http://sheetsu.com/apis/4c61fd45"
+#SHEETSU_URL = "http://sheetsu.com/apis/4c61fd45"
 MASTER_URL = "https://docs.google.com/spreadsheets/d/1fCtHu00KCcOAG124hyyrwu3iltEd6amJPYhhXrO3ptY"
-
+MASTER_KEY = MASTER_URL.split('/')[-1]
 # -- column names
 ARROWTIME = 'arrowtime'
 SHEETURL = 'SheetURL'
@@ -47,9 +47,12 @@ def allSlots():
             print('timing!')
     #else
     print('uncached!')
-    r = requests.get(SHEETSU_URL)
+    
     try:
-        all_slots = r.json()['result']
+        master_sheet = gc.open_by_key(MASTER_KEY).sheet1
+        all_slots = master_sheet.get_all_records()
+        
+        #all_slots = r.json()['result']
     except Exception as e:
         return {"Error":e}
     
